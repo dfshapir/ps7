@@ -39,7 +39,7 @@ sum4 <- summary(reg4)
 stargazer(reg1, reg2, reg3, reg4, type = "text")
 ```
 
-This output looks very strange at first glance, but it actually ends up making sense once you look at the graphs produced below. Basically 
+This output looks very strange at first glance, given that each relationship has identical coefficients, but it actually ends up making sense once you look at the graphs produced below. Basically, the coefficients indicate that for each unit that x1 increases, y1 increases by around 0.5, and so on and so forth for x2/y2, x3/y3, and x4/y4.
 
 ### 1c) Using ggplot(), produce scatterplots of each $y$ on its corresponding $x$ and add both a linear regression line.
 
@@ -64,3 +64,82 @@ ggplot(dataset, aes(x = x4, y = y4)) +
 ### 1d) What can you conclude about the use of regression (or other fancy statistical techniques) from this example?
 
 Well, it's certainly not an infallible technique. These regressions technically all have the same coefficient, but the respective graphs of the variables' relationships look completely different from one another. In order to truly understand the nature of the data and the relationship between two variables, you need to do some additional analysis and remember that even if some relationships have the same coefficients, it doesn't necessarily mean that the relationship truly looks the same. 
+
+### Question 2 Background: 
+
+*Let's explore some data on expenditures for households in Pakistan. The data in \texttt{pakistan.dta} on the course website come from a nationally representative sample of households in Pakistan in 1995. Each of the $n$ observations pertainst to a household $i$. Variable definitions are as follows (all monetary figures are in 1995 rupees):*
+
+\begin{itemize}
+\item totexp: Total monthly household expenditures (in rupees)
+\item food: Total monthly household expenditures on food (in rupees)
+\item hhincome: Total monthly household income (in thousands of rupees)
+\item nfkids: number of female children in the household
+\item nmkids: number of male kids in the household
+\item nfadult: number of female adults in the household
+\item nmadult: number of male adults in the household
+\end{itemize}
+
+### 2a) Engel's Law states that as households become richer, they spend a smaller percent of their total budget on food. Run a regression of the percent of total household expenditure on food (call it $y$) on household income per capita (call it $x$) using the \texttt{lm} command (see help file for how to structure your argument). Use \texttt{stargazer} to present your results in a nicely formatted table.
+
+```{r loadinb}
+seconddata <- read_dta("pakistan.dta")
+```
+
+```{r 2a}
+# First, I need to make a new data column with the percentage.
+
+seconddata <- seconddata %>%
+  mutate(pctfood = food/totexp * 100) %>%
+  
+# I divided my totexp by 1000 to make the results more usable.
+  
+  mutate(totexp = totexp/1000)
+
+percentfood <- lm(pctfood ~ totexp, data = seconddata)
+
+stargazer(percentfood, type = "text")
+```
+
+### 2b) Produce a scatterplot of $y$ and $x$, with a superimposed linear regression line, using ggplot(). Also add a more flexible loess line, in a different color or line style.
+
+```{r 2b}
+ggplot(seconddata, aes(x = totexp, y = pctfood)) +
+  geom_point() + 
+  geom_smooth(method = "lm") +
+  ylim(0, 100) +
+  stat_smooth(method = "loess", color = "red") +
+  labs(title = "Relationship Between Total Expenses and Expenses on Food",
+       subtitle = "Data from Pakistan, 1995", 
+       x = "Total Family Expenses (Divided by 1000, in 1995 rupees)",
+       y = "Percentage Spent on Food")
+```
+
+### 2c) Interpret the slope coefficient. Does Engel's Law seem to hold?
+
+It does, the slope is negative. In this case, as income increases, the percentage spent on food (in general) decreases.
+
+### 2d) Interpret the intercept coefficient. Do you have a lot of confidence in this finding? Why or why not?
+
+First, I'm going to pull up the summary of the regression, so that we can see the intercept coefficient.
+
+```{r intercept}
+summary(percentfood)
+```
+
+I have no confidence in this finding, because it does not make logical sense. Essentially, the intercept tells us that when a household has an income of 0, they can be expected to spend 50% of their income on food. Needless to say, this makes no logical sense. We should not look at the intercept value as a key part of the model here.
+
+### Question 3 Background:
+
+*We're going to look at the relationship between age and income, using the dataset \texttt{vote.csv} from the course website.*
+
+### 3a) First, run a simple regression of income ($y$) on age ($x$) using the \texttt{lm} command. What do the results tell you? Briefly, how would you interpret the intercept and slope coefficients? 
+
+```{r readin3}
+vote <- read.csv("vote.csv")
+```
+
+```{r 3a}
+aregression <- lm(income ~ age, data = vote)
+summary(aregression)
+```
+
