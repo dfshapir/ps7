@@ -1,0 +1,66 @@
+---
+title: "Problem Set 7"
+author: "Daniel Shapiro"
+date: "10/26/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(stats)
+library(haven)
+library(stargazer)
+```
+
+### Question 1 Background:
+
+*Download the dataset \texttt{quartet.dta} from the course website.*
+
+### 1a) Load the dataset. The file is in a format compatible with Stata, but not with base R. Google how to load .dta files in R.
+
+```{r loadina}
+dataset <- read_dta("quartet.dta")
+```
+
+### 1b) Regress each $y$ on its corresponding $x$ (e.g., $y1$ on $x1$, $y2$ on $x2$) using the \texttt{lm()} command. Using stargazer, present the results in a nicely formatted table. Interpret the regression coefficients.
+
+```{r 1b}
+reg1 <- lm(`y1` ~ `x1`, data = dataset)
+reg2 <- lm(`y2` ~ `x2`, data = dataset)
+reg3 <- lm(`y3` ~ `x3`, data = dataset)
+reg4 <- lm(`y4` ~ `x4`, data = dataset)
+
+sum1 <- summary(reg1)
+sum2 <- summary(reg2)
+sum3 <- summary(reg3)
+sum4 <- summary(reg4)
+
+stargazer(reg1, reg2, reg3, reg4, type = "text")
+```
+
+This output looks very strange at first glance, but it actually ends up making sense once you look at the graphs produced below. Basically 
+
+### 1c) Using ggplot(), produce scatterplots of each $y$ on its corresponding $x$ and add both a linear regression line.
+
+```{r}
+ggplot(dataset, aes(x = x1, y = y1)) +
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+ggplot(dataset, aes(x = x2, y = y2)) +
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+ggplot(dataset, aes(x = x3, y = y3)) +
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+ggplot(dataset, aes(x = x4, y = y4)) +
+  geom_point() + 
+  geom_smooth(method = "lm")
+```
+
+### 1d) What can you conclude about the use of regression (or other fancy statistical techniques) from this example?
+
+Well, it's certainly not an infallible technique. These regressions technically all have the same coefficient, but the respective graphs of the variables' relationships look completely different from one another. In order to truly understand the nature of the data and the relationship between two variables, you need to do some additional analysis and remember that even if some relationships have the same coefficients, it doesn't necessarily mean that the relationship truly looks the same. 
