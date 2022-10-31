@@ -93,9 +93,13 @@ seconddata <- seconddata %>%
   
 # I divided my totexp by 1000 to make the results more usable.
   
-  mutate(totexp = totexp/1000)
+  mutate(totexp = totexp/1000) %>%
+  
+# I have to make a new "percapita" column that takes into account all family members.
+  
+  mutate(percapita = hhincome/(nfadult + nmadult + nfkids + nmkids))
 
-percentfood <- lm(pctfood ~ totexp, data = seconddata)
+percentfood <- lm(pctfood ~ percapita, data = seconddata)
 
 stargazer(percentfood, type = "text")
 ```
@@ -103,14 +107,14 @@ stargazer(percentfood, type = "text")
 ### 2b) Produce a scatterplot of $y$ and $x$, with a superimposed linear regression line, using ggplot(). Also add a more flexible loess line, in a different color or line style.
 
 ```{r 2b}
-ggplot(seconddata, aes(x = totexp, y = pctfood)) +
+ggplot(seconddata, aes(x = percapita, y = pctfood)) +
   geom_point() + 
   geom_smooth(method = "lm") +
   ylim(0, 100) +
   stat_smooth(method = "loess", color = "red") +
-  labs(title = "Relationship Between Total Expenses and Expenses on Food",
+  labs(title = "Relationship Between Income and Expenses on Food",
        subtitle = "Data from Pakistan, 1995", 
-       x = "Total Family Expenses (Divided by 1000, in 1995 rupees)",
+       x = "Household Income Per Capita, in 1995 rupees",
        y = "Percentage Spent on Food")
 ```
 
@@ -126,7 +130,7 @@ First, I'm going to pull up the summary of the regression, so that we can see th
 summary(percentfood)
 ```
 
-I have no confidence in this finding, because it does not make logical sense. Essentially, the intercept tells us that when a household has an income of 0, they can be expected to spend 50% of their income on food. Needless to say, this makes no logical sense. We should not look at the intercept value as a key part of the model here.
+I have no confidence in this finding, because it does not make logical sense. Essentially, the intercept tells us that when a household has a per capita income of 0, they can be expected to spend 50% of their income on food. Needless to say, this makes no logical sense. We should not look at the intercept value as a key part of the model here.
 
 ### Question 3 Background:
 
