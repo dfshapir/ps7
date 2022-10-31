@@ -143,3 +143,75 @@ aregression <- lm(income ~ age, data = vote)
 summary(aregression)
 ```
 
+First, it's worth pointing out that the income variable, if I'm interpreting 3c) correctly, actually represents the percentage of a person's income that they spend on food. So we should analyze our results with this factor in mind. The intercept here really isn't helpful, because age is on the x-axis, meaning that this is the value when x = 0, or when age = 0. Presumably, no baby has an income, unless they are very precocious and Arkansas and South Carolina are ignoring their child labor laws. The slope coefficient (-0.051250) essentially means that for each additional year, people in this dataset tend to spent about .05% less of their income on food, with a high degree of significance.
+
+### 3b) Create a scatterplot of the data, where age is on the $x$-axis and income is on the $y$-axis. Add a line representing the regression line found in part (a), and a more flexibly-fit loess line. What does this tell you about the relationship between age and income?
+
+```{r 3b}
+ggplot(vote, aes(x = age, y = income)) +
+  geom_point() +
+  geom_smooth(method = "loess", color = "red") +
+  geom_smooth(method = "lm") + 
+  labs(x = "Age",
+       y = "Pct of Income Spent on Food",
+       title = "Relationship of Age and Percentage of Income Spent on Food",
+       subtitle = "Arkansas and South Carolina, 2000")
+```
+
+Including the loess line helps us see a more accurate picture of the trends in this data. Here we see that on average, people don't spend too much of their income on food when they're 20, but that number gradually increases until they hit about 45, after which it steadily drops, most likely (in my opinion) because people are still making a decent amount of money but no longer are supporting/feeding children. The relationship between the age and income variables is definitely not linear. I mean, a linear regression line can be fit to it and we can see a general pattern, but it doesn't show us the "true nature" of the data as well as this loess line does.
+
+### 3c) Let's analyze the data using a different way of presenting the results. First, convert the age variable from a continuous variable into a categorical or factor variable, with the following bins: $18-35, 36-50, 51-65, 66-85$. Produce histograms of the relationship between each age bin and the percent of income spent on food. What do your results suggest?
+
+```{r 3c}
+# Here, I can use a for loop. First, I have to create a new column.
+
+vote3c <- vote %>%
+  mutate(age_categorical = 1)
+
+for(i in 1:1500){
+  if(vote3c$age[i] %in% c(66:85)){vote3c$age_categorical[i] <- 4}
+  else if(vote3c$age[i] %in% c(51:65)){vote3c$age_categorical[i] <- 3}
+  else if(vote3c$age[i] %in% c(36:50)){vote3c$age_categorical[i] <- 2}
+  else(vote3c$age_categorical[i] <- 1)
+}
+```
+
+```{r histograms}
+first_histdata <- vote3c %>%
+  filter(age_categorical == 1)
+
+ggplot(first_histdata, aes(x = income)) +
+  geom_histogram(bins = 15) +
+  labs(x = "Pct. of Income Spent on Food",
+       y = "Count",
+       title = "Ages 18-35")
+
+second_histdata <- vote3c %>%
+  filter(age_categorical == 2)
+
+ggplot(second_histdata, aes(x = income)) +
+  geom_histogram(bins = 15) +
+  labs(x = "Pct. of Income Spent on Food",
+       y = "Count",
+       title = "Ages 36-50")
+
+third_histdata <- vote3c %>%
+  filter(age_categorical == 3)
+
+ggplot(third_histdata, aes(x = income)) +
+  geom_histogram(bins = 15) +
+  labs(x = "Pct. of Income Spent on Food",
+       y = "Count",
+       title = "Ages 51-65")
+
+fourth_histdata <- vote3c %>%
+  filter(age_categorical == 4)
+
+ggplot(fourth_histdata, aes(x = income)) +
+  geom_histogram(bins = 15) +
+  labs(x = "Pct. of Income Spent on Food",
+       y = "Count",
+       title = "Ages 66-85")
+```
+
+This is some interesting data. Generally speaking, people from ages 36-65, the graphs look similar -- the quantity of people rises gradually per percentage until it gets to a certain point until it spikes upward. The spike is more dramatic for these two age groups than for people between 18-35, although that age group does have a relatively similar-looking graph to the next two age groups. For people from 66-85, though, the graph looks completely different. The pattern looks more centered around 10% than 15% like in the preceding graphs, and there are results to both the left and right of the maximum. It seems that in general, people ages 66 and above have either different spending habits on food in general, different earning habits, different life situations, etc. that leads for the histogram for this population to look different than thte others. 
